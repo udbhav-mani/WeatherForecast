@@ -13,11 +13,11 @@ class Pollution:
             self.POLLUTION_URI,
             params={"q": f"{location.latitude},{location.longitude}"},
         )
-        pprint(response.json())
+        return response.json()
 
     def get_pollution_by_latlon(self, lat=None, lon=None):
         response = requests.get(self.POLLUTION_URI, params={"q": f"{lat},{lon}"})
-        pprint(response.json())
+        return response.json()
 
 
 if __name__ == "__main__":

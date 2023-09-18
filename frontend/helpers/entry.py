@@ -10,6 +10,10 @@ import os
 from yaspin import yaspin
 from termcolor import colored
 
+from prettytable import PrettyTable, ALL
+
+from helpers.validators import Validators
+
 
 class Entry:
     def entry(self):
@@ -56,12 +60,17 @@ class Entry:
         elif choice == "Pollution":
             self.__pollution_choices(data)
 
+        self.__choose_to_continue()
+
     def __current_weather_choices(self, data):
         weather = Weather()
         if len(data) == 1:
-            weather.get_weather_by_city(cityname=data[0])
+            data = weather.get_weather_by_city(cityname=data[0])
         else:
-            weather.get_weather_by_latlon(lat=data[0], lon=data[1])
+            data = weather.get_weather_by_latlon(lat=data[0], lon=data[1])
+
+        table = self.__dictionary_to_table(data)
+        print(table)
 
     def __weather_forecast_choices(self, data):
         choices = [
@@ -86,9 +95,14 @@ class Entry:
 
         forecast = Forecast()
         if len(data) == 1:
-            forecast.get_forecast_by_city(cityname=data[0], days=days)
+            data = forecast.get_forecast_by_city(cityname=data[0], days=days)
         else:
-            forecast.get_forecast_by_latlon(lat=data[0], lon=data[1], days=days)
+            data = forecast.get_forecast_by_latlon(lat=data[0], lon=data[1], days=days)
+
+        for item in data:
+            table = self.__dictionary_to_table(item)
+            print(table)
+            print("\n\n")
 
     def __weather_history_choices(self, data):
         choices = [
@@ -104,16 +118,22 @@ class Entry:
         dt = answers["choice"]
         history = History()
         if len(data) == 1:
-            history.get_history_by_city(cityname=data[0], date=dt)
+            data = history.get_history_by_city(cityname=data[0], date=dt)
         else:
-            history.get_history_by_latlon(lat=data[0], lon=data[1], date=dt)
+            data = history.get_history_by_latlon(lat=data[0], lon=data[1], date=dt)
+
+        table = self.__dictionary_to_table(data)
+        print(table)
 
     def __pollution_choices(self, data):
         pollution = Pollution()
         if len(data) == 1:
-            pollution.get_pollution_by_city(cityname=data[0])
+            data = pollution.get_pollution_by_city(cityname=data[0])
         else:
-            pollution.get_pollution_by_latlon(lat=data[0], lon=data[1])
+            data = pollution.get_pollution_by_latlon(lat=data[0], lon=data[1])
+
+        table = self.__dictionary_to_table(data)
+        print(table)
 
     def __current_location(self):
         g = geocoder.ip("me")
@@ -152,13 +172,25 @@ class Entry:
         answers = inquirer.prompt(choices)
         choice = answers["choice"]
         if choice == "Latitude-Longitude":
-            lat = input("Please enter latitude -> ")
-            lon = input("Please enter longitude -> ")
+            lat = None
+            lon = None
+            while True:
+                try:
+                    lat = float(input("Please enter latitude -> "))
+                    break
+                except ValueError:
+                    print("Please give correct input.")
+            while True:
+                try:
+                    lon = float(input("Please enter longitude -> "))
+                    break
+                except ValueError:
+                    print("Please give correct input.")
 
             return (lat, lon)
 
         elif choice == "City Name":
-            cityname = input("Please enter city name -> ")
+            cityname = GetInput.get_city_name()
             return (cityname,)
 
     def __horizontal_loading_bar(self):
@@ -180,3 +212,54 @@ class Entry:
         text = font.renderText("Thank You")
         colored_text = colored(text, color="cyan")
         print(colored_text, end="")
+        time.sleep(3)
+        os.system("cls")
+        quit()
+
+    def __choose_to_continue(self):
+        choices = [
+            inquirer.List(
+                "choice",
+                message="Do you want to continue ?",
+                choices=["Yes", "No"],
+            ),
+        ]
+        answers = inquirer.prompt(choices)
+        choice = answers["choice"]
+
+        os.system("cls")
+        if choice == "Yes":
+            self.__choice_displayer()
+        elif choice == "No":
+            self.__end_program()
+
+    def __dictionary_to_table(self, data):
+        table = PrettyTable()
+        table.hrules = ALL
+        table.field_names = ["Property", "Value"]
+        for key, value in data.items():
+            if isinstance(value, dict):
+                nested_table = self.__dictionary_to_table(value)
+                table.add_row([colored(key, "cyan"), nested_table])
+            else:
+                colored_key = colored(key, "cyan")
+                colored_value = colored(str(value), "green")
+                table.add_row([colored_key, colored_value])
+        return table
+
+
+class GetInput:
+    """
+    class to group all input methods
+    The associated methods also validate input
+    """
+
+    @staticmethod
+    def get_city_name():
+        """validates cityname according to regex = [A-Za-z ]+"""
+        cityname = input("Enter cityname - ")
+        if not Validators.validate_input(cityname):
+            print("Invalid Username!! Try again!")
+            cityname = GetInput.get_city_name()
+
+        return cityname

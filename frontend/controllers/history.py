@@ -7,13 +7,13 @@ class History:
 
     def get_history_by_city(self, cityname=None, date=None):
         response = requests.get(self.HISTORY_URI, params={"q": cityname, "date": date})
-        print(response.json())
+        return response.json()
 
     def get_history_by_latlon(self, lat=None, lon=None, date=None):
         response = requests.get(
             self.HISTORY_URI, params={"q": f"{lat},{lon}", "date": date}
         )
-        print(response.json())
+        return response.json()
 
 
 if __name__ == "__main__":

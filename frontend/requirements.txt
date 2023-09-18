@@ -3,3 +3,4 @@ inquirer
 pyfiglet
 yaspin
 colored
+prettytable
