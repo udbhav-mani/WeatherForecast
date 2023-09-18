@@ -8,6 +8,10 @@ from controllers import Forecast
 from controllers import Pollution
 from controllers import History
 from datetime import date, timedelta
+import pyfiglet
+import time
+import os
+from yaspin import yaspin
 
 
 class Entry:

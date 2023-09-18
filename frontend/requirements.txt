@@ -1,2 +1,5 @@
 geocoder
 inquirer
+pyfiglet
+yaspin
+colored
