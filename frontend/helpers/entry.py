@@ -2,10 +2,7 @@ import os
 import geocoder
 import inquirer
 from geopy.geocoders import Nominatim
-from controllers import Weather
-from controllers import Forecast
-from controllers import Pollution
-from controllers import History
+from controllers import Weather, Forecast, Pollution, History
 from datetime import date, timedelta
 import pyfiglet
 import time
@@ -35,14 +32,18 @@ class Entry:
                     "Weather Forecast",
                     "Weather History",
                     "Pollution",
+                    "Exit",
                 ],
             ),
         ]
         answers = inquirer.prompt(choices)
         choice = answers["choice"]
 
-        data = self.__current_location()
+        if choice == "Exit":
+            self.__end_program()
+            return
 
+        data = self.__current_location()
         if choice == "Weather Currently":
             self.__current_weather_choices(data)
 
@@ -172,3 +173,10 @@ class Entry:
 
     def __clear_terminal(self):
         os.system("cls" if os.name == "nt" else "clear")
+
+    def __end_program(self):
+        os.system("cls")
+        font = pyfiglet.Figlet(font="graffiti")
+        text = font.renderText("Thank You")
+        colored_text = colored(text, color="cyan")
+        print(colored_text, end="")
