@@ -2,7 +2,6 @@ import os
 import geocoder
 import inquirer
 from geopy.geocoders import Nominatim
-
 from controllers import Weather
 from controllers import Forecast
 from controllers import Pollution
