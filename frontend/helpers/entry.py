@@ -12,10 +12,18 @@ import pyfiglet
 import time
 import os
 from yaspin import yaspin
+from termcolor import colored
 
 
 class Entry:
     def entry(self):
+        font = pyfiglet.Figlet(font="graffiti")
+        text = font.renderText("Weather Forecaster")
+        colored_text = colored(text, color="cyan")
+        print(colored_text, end="")
+
+        self.__horizontal_loading_bar()
+        self.__clear_terminal()
         self.__choice_displayer()
 
     def __choice_displayer(self):
@@ -152,3 +160,16 @@ class Entry:
         elif choice == "City Name":
             cityname = input("Please enter city name -> ")
             return (cityname,)
+
+    def __horizontal_loading_bar(self):
+        with yaspin(text="Loading...", color="yellow") as sp:
+            for i in range(101):
+                progress = "=" * i
+                sp.text = f"Loading... [{progress:<100}] {i}%"
+                sp.show()
+                time.sleep(0.03)
+            sp.text = "Loading... [====================================================================================================] 100%"
+            sp.ok("✔")
+
+    def __clear_terminal(self):
+        os.system("cls" if os.name == "nt" else "clear")
