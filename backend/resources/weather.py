@@ -1,10 +1,9 @@
 from datetime import datetime
 import os
-from flask import Flask, request
+from flask import request
 from flask.views import MethodView
 from flask_smorest import Blueprint, abort
 import requests
-from schemas import LocationSchema
 from schemas import WeatherSchema
 
 blp = Blueprint("Weather", "Weather", description="Operations on weather")

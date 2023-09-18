@@ -1,5 +1,4 @@
-import os
-from flask import Flask, jsonify
+from flask import Flask
 from flask import Flask
 from flask_smorest import Api
 from resources.pollution import blp as PollutionBlueprint
