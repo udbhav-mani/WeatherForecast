@@ -32,3 +32,8 @@ class PollutionSchema(Schema):
     so2 = fields.Float(required=True)
     no2 = fields.Float(required=True)
     co = fields.Float(required=True)
+
+
+class ForecastSchema(WeatherSchema):
+    chance_of_rain = fields.Int(required=True)
+    condition = fields.String(required=True)
