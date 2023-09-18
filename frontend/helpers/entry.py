@@ -7,6 +7,7 @@ from controllers import Weather
 from controllers import Forecast
 from controllers import Pollution
 from controllers import History
+from datetime import date, timedelta
 
 
 class Entry:
@@ -51,10 +52,49 @@ class Entry:
             weather.get_weather_by_latlon(lat=data[0], lon=data[1])
 
     def __weather_forecast_choices(self, data):
-        pass
+        choices = [
+            inquirer.List(
+                "choice",
+                message="For how many days you want to see the forecast?",
+                choices=["Next 1 Day", "Next 2 Days", "Next 3 Days"],
+            ),
+        ]
+        answers = inquirer.prompt(choices)
+        choice = answers["choice"]
+
+        days = None
+        if choice == "Next 1 Day":
+            days = 1
+
+        elif choice == "Next 2 Days":
+            days = 2
+
+        elif choice == "Next 3 Days":
+            days = 3
+
+        forecast = Forecast()
+        if len(data) == 1:
+            forecast.get_forecast_by_city(cityname=data[0], days=days)
+        else:
+            forecast.get_forecast_by_latlon(lat=data[0], lon=data[1], days=days)
 
     def __weather_history_choices(self, data):
-        pass
+        choices = [
+            inquirer.List(
+                "choice",
+                message="Please select the date you want to see history for -> ",
+                choices=[
+                    (date.today() - timedelta(days=i)).__str__() for i in range(1, 6)
+                ],
+            ),
+        ]
+        answers = inquirer.prompt(choices)
+        dt = answers["choice"]
+        history = History()
+        if len(data) == 1:
+            history.get_history_by_city(cityname=data[0], date=dt)
+        else:
+            history.get_history_by_latlon(lat=data[0], lon=data[1], date=dt)
 
     def __pollution_choices(self, data):
         pollution = Pollution()

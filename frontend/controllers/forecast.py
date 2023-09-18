@@ -1,4 +1,5 @@
 import os
+from pprint import pprint
 import requests
 
 
@@ -7,13 +8,13 @@ class Forecast:
 
     def get_forecast_by_city(self, cityname=None, days=None):
         response = requests.get(self.FORECAST_URI, params={"q": cityname, "days": days})
-        print(response.json())
+        pprint(response.json())
 
     def get_forecast_by_latlon(self, lat=None, lon=None, days=None):
         response = requests.get(
             self.FORECAST_URI, params={"q": f"{lat},{lon}", "days": days}
         )
-        print(response.json())
+        pprint(response.json())
 
 
 if __name__ == "__main__":
