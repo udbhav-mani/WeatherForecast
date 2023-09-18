@@ -3,15 +3,14 @@ from marshmallow import Schema, fields
 
 class LocationSchema(Schema):
     cityname = fields.Str()
-    country = fields.Str()
     lat = fields.Float()
     lon = fields.Float()
-    localtime = fields.Time()
+    localtime = fields.DateTime()
 
 
 class AstroSchema(Schema):
-    sunrise = fields.Time(required=True)
-    sunset = fields.Time(required=True)
+    sunrise = fields.DateTime(required=True)
+    sunset = fields.DateTime(required=True)
 
 
 class WeatherSchema(Schema):
