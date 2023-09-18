@@ -24,3 +24,13 @@ class WeatherSchema(Schema):
     humidity = fields.Float(required=True)
     astro = fields.Nested(AstroSchema, dump_only=True)
     location = fields.Nested(LocationSchema, dump_only=True)
+
+
+class PollutionSchema(Schema):
+    location = fields.Nested(LocationSchema, dump_only=True)
+    aqi = fields.Float(required=True)
+    pm25 = fields.Float(required=True)
+    pm10 = fields.Float(required=True)
+    so2 = fields.Float(required=True)
+    no2 = fields.Float(required=True)
+    co = fields.Float(required=True)
