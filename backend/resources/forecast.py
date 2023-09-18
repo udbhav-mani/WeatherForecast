@@ -40,7 +40,6 @@ class Forecast(MethodView):
             temp = day["day"]["avgtemp_c"]
             temp_max = day["day"]["maxtemp_c"]
             temp_min = day["day"]["mintemp_c"]
-            feels_like = day["day"]["avgtemp_c"]
             humidity = day["day"]["avghumidity"]
             date = datetime.fromtimestamp(day["date_epoch"])
             chance_of_rain = day["day"]["daily_will_it_rain"]
@@ -50,7 +49,6 @@ class Forecast(MethodView):
                 "temp": temp,
                 "max_temp": temp_max,
                 "min_temp": temp_min,
-                "feels_like": feels_like,
                 "humidity": humidity,
                 "location": {
                     "cityname": cityname,

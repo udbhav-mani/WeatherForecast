@@ -34,6 +34,11 @@ class PollutionSchema(Schema):
     co = fields.Float(required=True)
 
 
-class ForecastSchema(WeatherSchema):
+class ForecastSchema(Schema):
+    temp = fields.Float(required=True)
+    max_temp = fields.Float(required=True)
+    humidity = fields.Float(required=True)
+    location = fields.Nested(LocationSchema, dump_only=True)
+    min_temp = fields.Float(required=True)
     chance_of_rain = fields.Int(required=True)
     condition = fields.String(required=True)

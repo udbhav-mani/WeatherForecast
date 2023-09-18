@@ -5,6 +5,7 @@ from flask_smorest import Api
 from resources.pollution import blp as PollutionBlueprint
 from resources.weather import blp as WeatherBlueprint
 from resources.forecast import blp as ForecastBlueprint
+from resources.history import blp as HistoryBlueprint
 
 
 def create_app():
@@ -25,5 +26,6 @@ def create_app():
     api.register_blueprint(WeatherBlueprint)
     api.register_blueprint(PollutionBlueprint)
     api.register_blueprint(ForecastBlueprint)
+    api.register_blueprint(HistoryBlueprint)
 
     return app
