@@ -1,4 +1,5 @@
 from datetime import datetime
+import os
 from flask import Flask, request
 from flask.views import MethodView
 from flask_smorest import Blueprint, abort
@@ -20,21 +21,21 @@ class Weather(MethodView):
 
         if mode == "city":
             response_current = requests.get(
-                "https://api.openweathermap.org/data/2.5/weather",
+                os.getenv("OWM_BASEURL_WEATHER"),
                 params={
                     "q": args,
                     "units": "metric",
-                    "appid": "df57d20422fed2e720c2fae8fa4c9777",
+                    "appid": os.getenv("OWM_APIKEY"),
                 },
             )
         else:
             lat, lon = args.split(",")
             response_current = requests.get(
-                "https://api.openweathermap.org/data/2.5/weather",
+                os.getenv("OWM_BASEURL_WEATHER"),
                 params={
                     "lat": lat,
                     "lon": lon,
-                    "appid": "df57d20422fed2e720c2fae8fa4c9777",
+                    "appid": os.getenv("OWM_APIKEY"),
                     "units": "metric",
                 },
             )
