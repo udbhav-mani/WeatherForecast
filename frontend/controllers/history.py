@@ -3,19 +3,19 @@ import requests
 
 
 class History:
-    FORECAST_URI = "http://127.0.0.1:5000/forecast"
+    HISTORY_URI = "http://127.0.0.1:5000/history"
 
-    def get_forecast_by_city(self, cityname=None, days=None):
-        response = requests.get(self.FORECAST_URI, params={"q": cityname, "days": days})
+    def get_history_by_city(self, cityname=None, date=None):
+        response = requests.get(self.HISTORY_URI, params={"q": cityname, "date": date})
         print(response.json())
 
-    def get_forecast_by_latlon(self, lat=None, lon=None, days=None):
+    def get_history_by_latlon(self, lat=None, lon=None, date=None):
         response = requests.get(
-            self.FORECAST_URI, params={"q": f"{lat},{lon}", "days": days}
+            self.HISTORY_URI, params={"q": f"{lat},{lon}", "date": date}
         )
         print(response.json())
 
 
 if __name__ == "__main__":
-    obj = Forecast()
-    obj.get_forecast_by_city(cityname="new york", days=3)
+    obj = History()
+    obj.get_history_by_city(cityname="new york", date="2023-09-15")
