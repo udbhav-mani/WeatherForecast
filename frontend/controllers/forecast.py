@@ -1,18 +1,21 @@
+import os
 import requests
 
 
 class Forecast:
-    def get_forecast_by_city(self, cityname=None):
-        uri = f"http://127.0.0.1:5000/weather/city"
-        response = requests.get(uri, params={"q": cityname})
+    FORECAST_URI = "http://127.0.0.1:5000/forecast"
+
+    def get_forecast_by_city(self, cityname=None, days=None):
+        response = requests.get(self.FORECAST_URI, params={"q": cityname, "days": days})
         print(response.json())
 
-    def get_weather_by_latlon(self, lat=None, lon=None):
-        uri = f"http://127.0.0.1:5000/weather/latlon"
-        response = requests.get(uri, params={"q": f"{lat},{lon}"})
+    def get_forecast_by_latlon(self, lat=None, lon=None, days=None):
+        response = requests.get(
+            self.FORECAST_URI, params={"q": f"{lat},{lon}", "days": days}
+        )
         print(response.json())
 
 
 if __name__ == "__main__":
-    obj = Weather()
-    obj.get_weather_by_city(cityname="new york")
+    obj = Forecast()
+    obj.get_forecast_by_city(cityname="new york", days=3)
