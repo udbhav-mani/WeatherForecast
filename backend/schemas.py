@@ -15,8 +15,7 @@ class AstroSchema(Schema):
 
 
 class WeatherSchema(Schema):
-    temp_c = fields.Float(required=True)
-    temp_f = fields.Float(required=True)
+    temp = fields.Float(required=True)
     max_temp = fields.Float(required=True)
     min_temp = fields.Float(required=True)
     feels_like = fields.Float(required=True)
