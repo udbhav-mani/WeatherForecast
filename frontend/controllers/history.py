@@ -1,19 +1,29 @@
 import os
 import requests
-
+import logging
+logger = logging.getLogger(__name__)
 
 class History:
     HISTORY_URI = "http://127.0.0.1:5000/history"
 
     def get_history_by_city(self, cityname=None, date=None):
-        response = requests.get(self.HISTORY_URI, params={"q": cityname, "date": date})
-        return response.json()
+        logger.debug(f"get_history_by_city called with params: {cityname}, {date}")
+        try:
+            response = requests.get(self.HISTORY_URI, params={"q": cityname, "date": date})
+            return response.json()
+        except Exception as error:
+            logger.error(f"get_history_by_city called with error : {error}")
 
     def get_history_by_latlon(self, lat=None, lon=None, date=None):
-        response = requests.get(
-            self.HISTORY_URI, params={"q": f"{lat},{lon}", "date": date}
-        )
-        return response.json()
+        logger.debug(f"get_history_by_city called with params: {lat}, {lon}, {date}")
+        try:
+            response = requests.get(
+                self.HISTORY_URI, params={"q": f"{lat},{lon}", "date": date}
+            )
+            return response.json()
+        except Exception as error:
+            logger.error(f"get_history_by_latlon called with error : {error}")
+
 
 
 if __name__ == "__main__":
