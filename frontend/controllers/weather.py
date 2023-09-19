@@ -2,7 +2,9 @@ import os
 from pprint import pprint
 import requests
 import logging
+
 logger = logging.getLogger(__name__)
+
 
 class Weather:
     def get_weather_by_city(self, cityname=None):
@@ -11,21 +13,31 @@ class Weather:
         try:
             WEATHER_URI_CITY = "http://127.0.0.1:5000/weather/city"
             response = requests.get(WEATHER_URI_CITY, params={"q": cityname})
-            return response.json()
+
+            if response.status_code != 500:
+                return response.json()
+
+            else:
+                raise Exception(response.json()["message"])
+
         except Exception as error:
             logger.error(f"get_weather_by_city called with error : {error}")
-
+            return error.__str__()
 
     def get_weather_by_latlon(self, lat=None, lon=None):
         logger.debug(f"get_weather_by_latlon called with params: {lat}, {lon}")
         try:
             WEATHER_URI_LATLON = "http://127.0.0.1:5000/weather/latlon"
             response = requests.get(WEATHER_URI_LATLON, params={"q": f"{lat},{lon}"})
-            return response.json()
+            if response.status_code != 500:
+                return response.json()
+
+            else:
+                raise Exception(response.json()["message"])
+
         except Exception as error:
             logger.error(f"get_weather_by_latlon called with error : {error}")
-
-
+            return error.__str__()
 
 
 if __name__ == "__main__":

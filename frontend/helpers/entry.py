@@ -11,12 +11,15 @@ from yaspin import yaspin
 from termcolor import colored
 
 from prettytable import PrettyTable, ALL
+from utils import prompts
+from utils import choices
 
 from helpers.validators import Validators
 
 
 class Entry:
     def entry(self):
+        os.system
         font = pyfiglet.Figlet(font="graffiti")
         text = font.renderText("Weather Forecaster")
         colored_text = colored(text, color="cyan")
@@ -27,21 +30,9 @@ class Entry:
         self.__choice_displayer()
 
     def __choice_displayer(self):
-        choices = [
-            inquirer.List(
-                "choice",
-                message="What do you want to know today?",
-                choices=[
-                    "Weather Currently",
-                    "Weather Forecast",
-                    "Weather History",
-                    "Pollution",
-                    "Exit",
-                ],
-            ),
-        ]
-        answers = inquirer.prompt(choices)
-        choice = answers["choice"]
+        prompt = prompts.INITIAL_PROMPT
+        options = choices.INITIAL_CHOICES
+        choice = self.__get_choice(prompt=prompt, options=options)
 
         if choice == "Exit":
             self.__end_program()
@@ -72,19 +63,17 @@ class Entry:
         else:
             data = weather.get_weather_by_latlon(lat=data[0], lon=data[1])
 
+        if isinstance(data, str):
+            print(data.title())
+            return
+
         table = self.__dictionary_to_table(data)
         print(table)
 
     def __weather_forecast_choices(self, data):
-        choices = [
-            inquirer.List(
-                "choice",
-                message="For how many days you want to see the forecast?",
-                choices=["Next 1 Day", "Next 2 Days", "Next 3 Days"],
-            ),
-        ]
-        answers = inquirer.prompt(choices)
-        choice = answers["choice"]
+        prompt = prompts.WEATHER_FORECAST_PROMPT
+        options = choices.WEATHER_FORECAST_CHOICES
+        choice = self.__get_choice(prompt=prompt, options=options)
 
         days = None
         if choice == "Next 1 Day":
@@ -102,28 +91,29 @@ class Entry:
         else:
             data = forecast.get_forecast_by_latlon(lat=data[0], lon=data[1], days=days)
 
+        if isinstance(data, str):
+            print(data)
+            return
+
         for item in data:
             table = self.__dictionary_to_table(item)
             print(table)
             print("\n\n")
 
     def __weather_history_choices(self, data):
-        choices = [
-            inquirer.List(
-                "choice",
-                message="Please select the date you want to see history for -> ",
-                choices=[
-                    (date.today() - timedelta(days=i)).__str__() for i in range(1, 6)
-                ],
-            ),
-        ]
-        answers = inquirer.prompt(choices)
-        dt = answers["choice"]
+        prompt = prompts.WEATHER_HISTORY_PROMPT
+        options = choices.WEATHER_HISTORY_CHOICES
+        dt = self.__get_choice(prompt=prompt, options=options)
+
         history = History()
         if len(data) == 1:
             data = history.get_history_by_city(cityname=data[0], date=dt)
         else:
             data = history.get_history_by_latlon(lat=data[0], lon=data[1], date=dt)
+
+        if isinstance(data, str):
+            print(data)
+            return
 
         table = self.__dictionary_to_table(data)
         print(table)
@@ -134,6 +124,10 @@ class Entry:
             data = pollution.get_pollution_by_city(cityname=data[0])
         else:
             data = pollution.get_pollution_by_latlon(lat=data[0], lon=data[1])
+
+        if isinstance(data, str):
+            print(data.title())
+            return
 
         table = self.__dictionary_to_table(data)
         print(table)
@@ -150,15 +144,10 @@ class Entry:
         else:
             print(f"Your Current location is - {locname[0]},{locname[2]}")
             print(f"Latitude -> {lat}, Longitude -> {lon}.")
-            choices = [
-                inquirer.List(
-                    "choice",
-                    message="Do you want to continue with current coordinates?",
-                    choices=["Yes", "No"],
-                ),
-            ]
-            answers = inquirer.prompt(choices)
-            choice = answers["choice"]
+
+            prompt = prompts.CURRENT_LOCATION_PROMPT
+            options = choices.CURRENT_LOCATION_CHOICES
+            choice = self.__get_choice(prompt=prompt, options=options)
 
             if choice == "Yes":
                 return (lat, lon)
@@ -168,16 +157,11 @@ class Entry:
 
     def __city_or_latlong(self):
         os.system("cls")
-        choices = [
-            inquirer.List(
-                "choice",
-                message="What would you like to enter? ",
-                choices=["Latitude-Longitude", "City Name"],
-            ),
-        ]
 
-        answers = inquirer.prompt(choices)
-        choice = answers["choice"]
+        prompt = prompts.LAT_OR_LONG_PROMPT
+        options = choices.LAT_OR_LONG_CHOICES
+        choice = self.__get_choice(prompt=prompt, options=options)
+
         if choice == "Latitude-Longitude":
             lat = None
             lon = None
@@ -224,15 +208,9 @@ class Entry:
         quit()
 
     def __choose_to_continue(self):
-        choices = [
-            inquirer.List(
-                "choice",
-                message="Do you want to continue ?",
-                choices=["Yes", "No"],
-            ),
-        ]
-        answers = inquirer.prompt(choices)
-        choice = answers["choice"]
+        prompt = prompts.CHOOSE_CONTINUE_PROMPT
+        options = choices.CHOOSE_CONTINUE_CHOICES
+        choice = self.__get_choice(prompt=prompt, options=options)
 
         os.system("cls")
         if choice == "Yes":
@@ -254,6 +232,13 @@ class Entry:
                 table.add_row([colored_key, colored_value])
         return table
 
+    def __get_choice(self, prompt, options):
+        choices = [
+            inquirer.List("choice", message=prompt, choices=options),
+        ]
+        answers = inquirer.prompt(choices)
+        return answers["choice"]
+
 
 class GetInput:
     """
@@ -266,7 +251,7 @@ class GetInput:
         """validates cityname according to regex = [A-Za-z ]+"""
         cityname = input("Enter cityname - ")
         if not Validators.validate_input(cityname):
-            print("Invalid Username!! Try again!")
+            print("Invalid cityname!! Try again!")
             cityname = GetInput.get_city_name()
 
         return cityname

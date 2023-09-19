@@ -1,0 +1,6 @@
+INITIAL_PROMPT = "What do you want to know today?"
+WEATHER_FORECAST_PROMPT = "For how many days you want to see the forecast?"
+WEATHER_HISTORY_PROMPT = "Please select the date you want to see history for -> "
+CURRENT_LOCATION_PROMPT = "Do you want to continue with current coordinates?"
+LAT_OR_LONG_PROMPT = "What would you like to enter? "
+CHOOSE_CONTINUE_PROMPT = "Do you want to continue ?"

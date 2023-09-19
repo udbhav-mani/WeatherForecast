@@ -26,7 +26,7 @@ class Forecast(MethodView):
         )
 
         if response_current.status_code != 200:
-            abort(500, message=response_current.json()["message"])
+            abort(500, message=response_current.json()["error"]["message"])
 
         response_current = response_current.json()
         lat = response_current["location"]["lat"]
