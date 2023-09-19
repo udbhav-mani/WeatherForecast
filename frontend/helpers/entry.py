@@ -48,6 +48,9 @@ class Entry:
             return
 
         data = self.__current_location()
+        if data is None:
+            return
+
         if choice == "Weather Currently":
             self.__current_weather_choices(data)
 
@@ -136,28 +139,32 @@ class Entry:
         print(table)
 
     def __current_location(self):
-        g = geocoder.ip("me")
+        try:
+            g = geocoder.ip("me")
+            geoLoc = Nominatim(user_agent="MyAPP")
+            lat, lon = g.latlng
+            locname = geoLoc.reverse(f"{lat}, {lon}").__str__().split(",")[-3:]
+        except Exception:
+            print("Could not get current location!! PLease restart and try!!")
+            return None
+        else:
+            print(f"Your Current location is - {locname[0]},{locname[2]}")
+            print(f"Latitude -> {lat}, Longitude -> {lon}.")
+            choices = [
+                inquirer.List(
+                    "choice",
+                    message="Do you want to continue with current coordinates?",
+                    choices=["Yes", "No"],
+                ),
+            ]
+            answers = inquirer.prompt(choices)
+            choice = answers["choice"]
 
-        geoLoc = Nominatim(user_agent="MyAPP")
-        lat, lon = g.latlng
-        locname = geoLoc.reverse(f"{lat}, {lon}").__str__().split(",")[-3:]
-        print(f"Your Current location is - {locname[0]},{locname[2]}")
-        print(f"Latitude -> {lat}, Longitude -> {lon}.")
-        choices = [
-            inquirer.List(
-                "choice",
-                message="Do you want to continue with current coordinates?",
-                choices=["Yes", "No"],
-            ),
-        ]
-        answers = inquirer.prompt(choices)
-        choice = answers["choice"]
+            if choice == "Yes":
+                return (lat, lon)
 
-        if choice == "Yes":
-            return (lat, lon)
-
-        elif choice == "No":
-            return self.__city_or_latlong()
+            elif choice == "No":
+                return self.__city_or_latlong()
 
     def __city_or_latlong(self):
         os.system("cls")
