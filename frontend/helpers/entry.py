@@ -19,8 +19,8 @@ from helpers.validators import Validators
 
 class Entry:
     def entry(self):
-        os.system
-        font = pyfiglet.Figlet(font="graffiti")
+        os.system("cls")
+        font = pyfiglet.Figlet(justify="center")
         text = font.renderText("Weather Forecaster")
         colored_text = colored(text, color="cyan")
         print(colored_text, end="")
@@ -191,7 +191,7 @@ class Entry:
                 sp.text = f"Loading... [{progress:<100}] {i}%"
                 sp.show()
                 time.sleep(0.03)
-            sp.text = "Loading... [====================================================================================================] 100%"
+            sp.text = "Loading... [****************************************************************************************************] 100%"
             sp.ok("✔")
 
     def __clear_terminal(self):
@@ -199,7 +199,7 @@ class Entry:
 
     def __end_program(self):
         os.system("cls")
-        font = pyfiglet.Figlet(font="graffiti")
+        font = pyfiglet.Figlet(justify="center")
         text = font.renderText("Thank You")
         colored_text = colored(text, color="cyan")
         print(colored_text, end="")
@@ -222,14 +222,27 @@ class Entry:
         table = PrettyTable()
         table.hrules = ALL
         table.field_names = ["Property", "Value"]
+        localtime = data.get("location")
+        if localtime is not None:
+            table.title = localtime.get("localtime").split("T")[0]
+            del data["location"]["localtime"]
         for key, value in data.items():
             if isinstance(value, dict):
                 nested_table = self.__dictionary_to_table(value)
-                table.add_row([colored(key, "cyan"), nested_table])
+                table.add_row(
+                    [colored(key.replace("_", " ").title(), "cyan"), nested_table]
+                )
             else:
-                colored_key = colored(key, "cyan")
+                if key in ["localtime", "sunrise", "sunset"]:
+                    value = value.replace("T", " ")
+                if key == "chance_of_rain":
+                    value = "Yes" if value else "No"
+
+                colored_key = colored(key.replace("_", " ").title(), "cyan")
                 colored_value = colored(str(value), "green")
                 table.add_row([colored_key, colored_value])
+        table.sortby = "Property"
+        table.reversesort = True
         return table
 
     def __get_choice(self, prompt, options):

@@ -4,7 +4,7 @@ from flask import request
 from flask.views import MethodView
 import requests
 from flask_smorest import Blueprint, abort
-from schemas import PollutionSchema, LocationSchema
+from schemas import PollutionSchema
 
 blp = Blueprint("Pollution", "pollution", description="Operations on pollution")
 
