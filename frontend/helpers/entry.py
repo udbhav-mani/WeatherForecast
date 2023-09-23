@@ -63,12 +63,11 @@ class Entry:
         else:
             data = weather.get_weather_by_latlon(lat=data[0], lon=data[1])
 
-        if isinstance(data, str):
-            print(data.title())
-            return
-
-        table = self.__dictionary_to_table(data)
-        print(table)
+        if data.get("status") == "failure":
+            print(data.get("error").get("message"))
+        else:
+            table = self.__dictionary_to_table(data)
+            print(table)
 
     def __weather_forecast_choices(self, data):
         prompt = prompts.WEATHER_FORECAST_PROMPT
@@ -91,14 +90,13 @@ class Entry:
         else:
             data = forecast.get_forecast_by_latlon(lat=data[0], lon=data[1], days=days)
 
-        if isinstance(data, str):
-            print(data)
-            return
-
-        for item in data:
-            table = self.__dictionary_to_table(item)
-            print(table)
-            print("\n\n")
+        if isinstance(data, dict):
+            print(data.get("error").get("message"))
+        else:
+            for item in data:
+                table = self.__dictionary_to_table(item)
+                print(table)
+                print("\n\n")
 
     def __weather_history_choices(self, data):
         prompt = prompts.WEATHER_HISTORY_PROMPT
@@ -111,12 +109,11 @@ class Entry:
         else:
             data = history.get_history_by_latlon(lat=data[0], lon=data[1], date=dt)
 
-        if isinstance(data, str):
-            print(data)
-            return
-
-        table = self.__dictionary_to_table(data)
-        print(table)
+        if data.get("status") == "failure":
+            print(data.get("error").get("message"))
+        else:
+            table = self.__dictionary_to_table(data)
+            print(table)
 
     def __pollution_choices(self, data):
         pollution = Pollution()
@@ -125,12 +122,11 @@ class Entry:
         else:
             data = pollution.get_pollution_by_latlon(lat=data[0], lon=data[1])
 
-        if isinstance(data, str):
-            print(data.title())
-            return
-
-        table = self.__dictionary_to_table(data)
-        print(table)
+        if data.get("status") == "failure":
+            print(data.get("error").get("message"))
+        else:
+            table = self.__dictionary_to_table(data)
+            print(table)
 
     def __current_location(self):
         try:

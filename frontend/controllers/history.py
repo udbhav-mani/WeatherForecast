@@ -10,32 +10,36 @@ class History:
 
     def get_history_by_city(self, cityname=None, date=None):
         logger.debug(f"get_history_by_city called with params: {cityname}, {date}")
-        try:
-            response = requests.get(
-                self.HISTORY_URI, params={"q": cityname, "date": date}
-            )
-            if response.status_code != 500:
-                return response.json()
-            else:
-                raise Exception(response.json()["message"])
-        except Exception as error:
+
+        response = requests.get(
+            self.HISTORY_URI + f"/{cityname}", params={"date": date}
+        )
+        if response.status_code == 500 or response.status_code == 404:
+            error = response.json().get("error").get("message")
             logger.error(f"get_history_by_city called with error : {error}")
-            return error.__str__()
+            return {
+                "status": "failure",
+                "error": {"code": 500, "message": error},
+            }
+        else:
+            return response.json()
 
     def get_history_by_latlon(self, lat=None, lon=None, date=None):
-        logger.debug(f"get_history_by_city called with params: {lat}, {lon}, {date}")
-        try:
-            response = requests.get(
-                self.HISTORY_URI, params={"q": f"{lat},{lon}", "date": date}
-            )
-            if response.status_code != 500:
-                return response.json()
+        logger.debug(f"get_history_by_latlon called with params: {lat}, {lon}, {date}")
 
-            else:
-                raise Exception(response.json()["message"])
-        except Exception as error:
+        response = requests.get(
+            self.HISTORY_URI,
+            params={"lat": f"{lat}", "lon": f"{lon}", "date": date},
+        )
+        if response.status_code == 500 or response.status_code == 404:
+            error = response.json().get("error").get("message")
             logger.error(f"get_history_by_latlon called with error : {error}")
-            return error.__str__()
+            return {
+                "status": "failure",
+                "error": {"code": 500, "message": error},
+            }
+        else:
+            return response.json()
 
 
 if __name__ == "__main__":

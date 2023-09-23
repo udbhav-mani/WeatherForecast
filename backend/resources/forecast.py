@@ -15,17 +15,17 @@ class ForecastCity(MethodView):
     def get(self, city_name):
         if not Validators.validate_city_name(city_name=city_name):
             return {
-                "error": {"code": 400, "message": "City name is invalid."},
+                "error": {"code": 404, "message": "City name is invalid."},
                 "status": "failure",
-            }, 400
+            }, 404
         try:
             days = request.args.get("days")
             Validators.validate_days(days=days)
         except WrongInputError as error:
             return {
-                "error": {"code": 400, "message": str(error)},
+                "error": {"code": 404, "message": str(error)},
                 "status": "failure",
-            }, 400
+            }, 404
 
         response_current = requests.get(
             os.getenv("RA_BASEURL_FORECAST"),
@@ -55,18 +55,18 @@ class ForecastLatlong(MethodView):
             Validators.validate_latlong(lat=lat, lon=lon)
         except WrongInputError as error:
             return {
-                "error": {"code": 400, "message": str(error)},
+                "error": {"code": 404, "message": str(error)},
                 "status": "failure",
-            }, 400
+            }, 404
 
         try:
             days = request.args.get("days")
             Validators.validate_days(days=days)
         except WrongInputError as error:
             return {
-                "error": {"code": 400, "message": str(error)},
+                "error": {"code": 404, "message": str(error)},
                 "status": "failure",
-            }, 400
+            }, 404
 
         response_current = requests.get(
             os.getenv("RA_BASEURL_FORECAST"),

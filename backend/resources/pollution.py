@@ -4,17 +4,27 @@ from flask import request
 from flask.views import MethodView
 import requests
 from flask_smorest import Blueprint, abort
-from schemas import PollutionSchema
+from helpers.response_parser import ResponseParser
+from helpers.exceptions import WrongInputError
+from helpers.validators import Validators
+from geopy.geocoders import Nominatim
 
 blp = Blueprint("Pollution", "pollution", description="Operations on pollution")
 
 
 @blp.route("/pollution")
 class Pollution(MethodView):
-    @blp.response(200, PollutionSchema())
     def get(self):
-        args = request.args.get("q")
-        lat, lon = args.split(",")
+        try:
+            lat = request.args.get("lat")
+            lon = request.args.get("lon")
+            Validators.validate_latlong(lat=lat, lon=lon)
+        except WrongInputError as error:
+            return {
+                "error": {"code": 404, "message": str(error)},
+                "status": "failure",
+            }, 404
+
         response_current = requests.get(
             os.getenv("OWM_BASEURL_POLLUTION"),
             params={
@@ -23,34 +33,56 @@ class Pollution(MethodView):
                 "appid": os.getenv("OWM_APIKEY"),
             },
         )
-
         if response_current.status_code != 200:
-            abort(500, message=response_current.json()["message"])
+            error_message = response_current.json()["message"]
+            return {
+                "error": {"code": 500, "message": error_message},
+                "status": "failure",
+            }, 500
 
-        # return response_current.json()
+        return ResponseParser.parse_pollution_response(response_current)
 
-        response_current = response_current.json()
-        lat = response_current["coord"]["lat"]
-        lon = response_current["coord"]["lon"]
-        localtime = datetime.fromtimestamp(response_current["list"][0]["dt"])
-        aqi = response_current["list"][0]["main"]["aqi"]
-        pm25 = response_current["list"][0]["components"]["pm2_5"]
-        pm10 = response_current["list"][0]["components"]["pm10"]
-        so2 = response_current["list"][0]["components"]["so2"]
-        no2 = response_current["list"][0]["components"]["no2"]
-        co = response_current["list"][0]["components"]["co"]
 
-        return_dict = {
-            "location": {
-                "lat": lat,
-                "lon": lon,
-                "localtime": localtime,
-            },
-            "aqi": aqi,
-            "pm25": pm25,
-            "pm10": pm10,
-            "so2": so2,
-            "no": no2,
-            "co": co,
-        }
-        return return_dict
+@blp.route("/pollution/<string:city_name>")
+class PollutionCity(MethodView):
+    def get(self, city_name):
+        if not Validators.validate_city_name(city_name=city_name):
+            return {
+                "error": {"code": 404, "message": "City name is invalid."},
+                "status": "failure",
+            }, 404
+
+        try:
+            geolocator = Nominatim(user_agent="MyApp")
+            location = geolocator.geocode(city_name)
+            if location is None:
+                return {
+                    "error": {"code": 404, "message": "Location not found."},
+                    "status": "failure",
+                }, 404
+
+            lat = location.latitude
+            lon = location.longitude
+
+        except Exception as error:
+            return {
+                "error": {"code": 404, "message": str(error)},
+                "status": "failure",
+            }, 404
+        else:
+            response_current = requests.get(
+                os.getenv("OWM_BASEURL_POLLUTION"),
+                params={
+                    "lat": lat,
+                    "lon": lon,
+                    "appid": os.getenv("OWM_APIKEY"),
+                },
+            )
+            if response_current.status_code != 200:
+                error_message = response_current.json()["message"]
+                return {
+                    "error": {"code": 500, "message": error_message},
+                    "status": "failure",
+                }, 500
+
+            return ResponseParser.parse_pollution_response(response_current)

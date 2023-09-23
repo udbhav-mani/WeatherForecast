@@ -1,5 +1,3 @@
-import os
-from pprint import pprint
 import requests
 import logging
 
@@ -12,38 +10,34 @@ class Forecast:
     def get_forecast_by_city(self, cityname=None, days=None):
         logger.debug(f"get_forecast_by_city called with params: {cityname}, {days}")
 
-        try:
-            response = requests.get(
-                self.FORECAST_URI + f"/{cityname}", params={"days": days}
-            )
-            if response.status_code != 500:
-                return response.json()
+        response = requests.get(
+            self.FORECAST_URI + f"/{cityname}", params={"days": days}
+        )
 
-            else:
-                raise Exception(response.json()["message"])
-        except Exception as error:
+        if response.status_code == 500 or response.status_code == 404:
+            error = response.json().get("error").get("message")
             logger.error(f"get_forecast_by_city called with error : {error}")
-            return error.__str__()
+            return {
+                "status": "failure",
+                "error": {"code": 500, "message": error},
+            }
+        else:
+            return response.json()
 
     def get_forecast_by_latlon(self, lat=None, lon=None, days=None):
         logger.debug(f"get_forecast_by_latlon called with params: {lat}, {lon}, {days}")
 
-        try:
-            response = requests.get(
-                self.FORECAST_URI,
-                params={"lat": f"{lat}", "lon": f"{lon}", "days": days},
-            )
+        response = requests.get(
+            self.FORECAST_URI,
+            params={"lat": f"{lat}", "lon": f"{lon}", "days": days},
+        )
 
-            if response.status_code != 500:
-                return response.json()
-
-            else:
-                raise Exception(response.json()["message"])
-        except Exception as error:
+        if response.status_code == 500 or response.status_code == 404:
+            error = response.json().get("error").get("message")
             logger.error(f"get_forecast_by_latlon called with error : {error}")
-            return error.__str__()
-
-
-if __name__ == "__main__":
-    obj = Forecast()
-    print(obj.get_forecast_by_latlon(lat=0.0, lon=0.0, days=3))
+            return {
+                "status": "failure",
+                "error": {"code": 500, "message": error},
+            }
+        else:
+            return response.json()

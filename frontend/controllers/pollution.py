@@ -12,42 +12,30 @@ class Pollution:
     def get_pollution_by_city(self, cityname=None):
         logger.debug(f"get_pollution_by_city called with params: {cityname}")
 
-        try:
-            geolocator = Nominatim(user_agent="MyApp")
-            location = geolocator.geocode(cityname)
-            if location is None:
-                raise Exception("Location Not found!! ")
+        response = requests.get(self.POLLUTION_URI + f"/{cityname}")
 
-            response = requests.get(
-                self.POLLUTION_URI,
-                params={"q": f"{location.latitude},{location.longitude}"},
-            )
-
-            if response.status_code != 500:
-                return response.json()
-
-            else:
-                raise Exception(response.json()["message"])
-
-        except Exception as error:
+        if response.status_code == 500 or response.status_code == 404:
+            error = response.json().get("error").get("message")
             logger.error(f"get_pollution_by_city called with error : {error}")
-            return error.__str__()
+            return {
+                "status": "failure",
+                "error": {"code": 500, "message": error},
+            }
+        else:
+            return response.json()
 
     def get_pollution_by_latlon(self, lat=None, lon=None):
         logger.debug(f"get_pollution_by_latlon called with params: {lat}, {lon}")
-        try:
-            response = requests.get(self.POLLUTION_URI, params={"q": f"{lat},{lon}"})
-
-            if response.status_code != 500:
-                return response.json()
-
-            else:
-                raise Exception(response.json()["message"])
-        except Exception as error:
+        response = requests.get(
+            self.POLLUTION_URI,
+            params={"lat": f"{lat}", "lon": f"{lon}"},
+        )
+        if response.status_code == 500 or response.status_code == 404:
+            error = response.json().get("error").get("message")
             logger.error(f"get_pollution_by_latlon called with error : {error}")
-            return error.__str__()
-
-
-if __name__ == "__main__":
-    obj = Pollution()
-    obj.get_pollution_by_city(cityname="delhi")
+            return {
+                "status": "failure",
+                "error": {"code": 500, "message": error},
+            }
+        else:
+            return response.json()
