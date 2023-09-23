@@ -16,7 +16,6 @@ class History:
             )
             if response.status_code != 500:
                 return response.json()
-
             else:
                 raise Exception(response.json()["message"])
         except Exception as error:

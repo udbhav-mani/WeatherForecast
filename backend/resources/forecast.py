@@ -1,24 +1,35 @@
-from datetime import datetime
 import os
 from flask import request
 from flask.views import MethodView
-from flask_smorest import Blueprint, abort
+from flask_smorest import Blueprint
 import requests
-from schemas import ForecastSchema
+from helpers.response_parser import ResponseParser
+from helpers.exceptions import WrongInputError
+from helpers.validators import Validators
 
 blp = Blueprint("Forecast", "Forecast", description="Operations on Forecast")
 
 
-@blp.route("/forecast")
-class Forecast(MethodView):
-    @blp.response(200, ForecastSchema(many=True))
-    def get(self):
-        q = request.args.get("q")
-        days = request.args.get("days")
+@blp.route("/forecast/<string:city_name>")
+class ForecastCity(MethodView):
+    def get(self, city_name):
+        if not Validators.validate_city_name(city_name=city_name):
+            return {
+                "error": {"code": 400, "message": "City name is invalid."},
+                "status": "failure",
+            }, 400
+        try:
+            days = request.args.get("days")
+            Validators.validate_days(days=days)
+        except WrongInputError as error:
+            return {
+                "error": {"code": 400, "message": str(error)},
+                "status": "failure",
+            }, 400
 
         response_current = requests.get(
             os.getenv("RA_BASEURL_FORECAST"),
-            params={"q": q, "days": days},
+            params={"q": city_name, "days": days},
             headers={
                 "X-RapidAPI-Key": os.getenv("RA_APIKEY"),
                 "X-RapidAPI-Host": os.getenv("RA_HOST"),
@@ -26,39 +37,43 @@ class Forecast(MethodView):
         )
 
         if response_current.status_code != 200:
-            abort(500, message=response_current.json()["error"]["message"])
+            error_message = response_current.json()["error"]["message"]
+            return {
+                "error": {"code": 500, "message": error_message},
+                "status": "failure",
+            }, 500
 
-        response_current = response_current.json()
-        lat = response_current["location"]["lat"]
-        lon = response_current["location"]["lon"]
-        cityname = response_current["location"]["name"]
+        return ResponseParser.parse_forecast_response(response=response_current)
 
-        ans = []
 
-        forecast_days = response_current["forecast"]["forecastday"]
-        for day in forecast_days:
-            temp = day["day"]["avgtemp_c"]
-            temp_max = day["day"]["maxtemp_c"]
-            temp_min = day["day"]["mintemp_c"]
-            humidity = day["day"]["avghumidity"]
-            date = datetime.fromtimestamp(day["date_epoch"])
-            chance_of_rain = day["day"]["daily_will_it_rain"]
-            condition = day["day"]["condition"]["text"]
+@blp.route("/forecast")
+class ForecastLatlong(MethodView):
+    def get(self):
+        try:
+            lat = request.args.get("lat")
+            lon = request.args.get("lon")
+            Validators.validate_latlong(lat=lat, lon=lon)
+        except WrongInputError as error:
+            return {
+                "error": {"code": 400, "message": str(error)},
+                "status": "failure",
+            }, 400
 
-            return_dict = {
-                "temp": temp,
-                "max_temp": temp_max,
-                "min_temp": temp_min,
-                "humidity": humidity,
-                "location": {
-                    "cityname": cityname,
-                    "lat": lat,
-                    "lon": lon,
-                    "localtime": date,
-                },
-                "chance_of_rain": chance_of_rain,
-                "condition": condition,
-            }
-            ans.append(return_dict)
+        try:
+            days = request.args.get("days")
+            Validators.validate_days(days=days)
+        except WrongInputError as error:
+            return {
+                "error": {"code": 400, "message": str(error)},
+                "status": "failure",
+            }, 400
 
-        return ans
+        response_current = requests.get(
+            os.getenv("RA_BASEURL_FORECAST"),
+            params={"q": f"{lat},{lon}", "days": days},
+            headers={
+                "X-RapidAPI-Key": os.getenv("RA_APIKEY"),
+                "X-RapidAPI-Host": os.getenv("RA_HOST"),
+            },
+        )
+        return ResponseParser.parse_forecast_response(response=response_current)

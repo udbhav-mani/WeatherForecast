@@ -1,5 +1,4 @@
 from flask import Flask
-from flask import Flask
 from flask_smorest import Api
 from resources.pollution import blp as PollutionBlueprint
 from resources.weather import blp as WeatherBlueprint

@@ -224,7 +224,8 @@ class Entry:
         table.field_names = ["Property", "Value"]
         localtime = data.get("location")
         if localtime is not None:
-            table.title = localtime.get("localtime").split("T")[0]
+            curr_date = localtime.get("localtime")[5:16].replace(" ", "-")
+            table.title = curr_date
             del data["location"]["localtime"]
         for key, value in data.items():
             if isinstance(value, dict):
@@ -238,7 +239,10 @@ class Entry:
                 if key == "chance_of_rain":
                     value = "Yes" if value else "No"
 
-                colored_key = colored(key.replace("_", " ").title(), "cyan")
+                colored_key = colored(
+                    key.replace("_", " ").title(),
+                    "cyan",
+                )
                 colored_value = colored(str(value), "green")
                 table.add_row([colored_key, colored_value])
         table.sortby = "Property"

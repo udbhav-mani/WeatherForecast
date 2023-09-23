@@ -14,7 +14,7 @@ class Forecast:
 
         try:
             response = requests.get(
-                self.FORECAST_URI, params={"q": cityname, "days": days}
+                self.FORECAST_URI + f"/{cityname}", params={"days": days}
             )
             if response.status_code != 500:
                 return response.json()
@@ -30,7 +30,8 @@ class Forecast:
 
         try:
             response = requests.get(
-                self.FORECAST_URI, params={"q": f"{lat},{lon}", "days": days}
+                self.FORECAST_URI,
+                params={"lat": f"{lat}", "lon": f"{lon}", "days": days},
             )
 
             if response.status_code != 500:
