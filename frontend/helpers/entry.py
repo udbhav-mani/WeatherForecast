@@ -3,7 +3,6 @@ import geocoder
 import inquirer
 from geopy.geocoders import Nominatim
 from controllers import Weather, Forecast, Pollution, History
-from datetime import date, timedelta
 import pyfiglet
 import time
 import os
